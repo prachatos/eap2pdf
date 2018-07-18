@@ -71,7 +71,6 @@ class EAPBookFetch:
             outfile = PdfFileWriter()
             pg = 1
             print('Deleting blank page...')
-            print(page_count)
             while pg < page_count:
                 p = infile.getPage(pg)
                 print(pg)
@@ -79,7 +78,10 @@ class EAPBookFetch:
                 outfile.addPage(p)
             with open(os.path.join('pdfs', eap_url_for_entry + '_nofirst.pdf'), 'wb') as f:
                 outfile.write(f)
-
+            try:
+                os.remove(os.path.join('pdfs', eap_url_for_entry + '.pdf'))
+            except OSError:
+                pass
 
     def run(self):
         if len(sys.argv) < 2:
