@@ -1,17 +1,21 @@
 import multiprocessing
 import os
+import re
 import sys
 import urllib.request
 from urllib.error import HTTPError
 from fpdf import FPDF
 import PyPDF2
 import time
-from datetime import timedelta
+import _helpers
+
 
 class EAPBookFetch:
 
     EAP_BASE_URL = 'https://images.eap.bl.uk'
+    EAP_ARCHIVE_URL = 'https://eap.bl.uk/archive-file/'
     EAP_LIST_FILENAME = 'eap_files.txt'
+    EAP_DONE_FILENAME = 'eap_done.txt'
     EAP_FILENAME = 'default.jpg'
     DEFAULT_HEIGHT = 1200
     DEFAULT_WIDTH = 1200 * 0.8
@@ -72,6 +76,7 @@ class EAPBookFetch:
         if not os.path.exists(self.PDF_PATH):
             os.makedirs(self.PDF_PATH)
         pdf.output(os.path.join(self.PDF_PATH, eap_url_for_entry + '.pdf'))
+
         if page_count > len(file_list):
             # delete pg 1
             infile = PyPDF2.PdfFileReader(os.path.join(self.PDF_PATH, eap_url_for_entry + '.pdf'))
@@ -82,8 +87,17 @@ class EAPBookFetch:
                 p = infile.getPage(pg)
                 pg = pg + 1
                 outfile.addPage(p)
-            with open(os.path.join(self.PDF_PATH, eap_url_for_entry + '_nofirst.pdf'), 'wb') as f:
+            exists, eap_file = _helpers.page_exists(self.EAP_ARCHIVE_URL + url.replace('/', '-'))
+            if not exists:
+                eap_filename = eap_url_for_entry
+            else:
+                eap_filename = eap_file.title.text.split('|')[0].strip()
+                eap_filename = re.sub(r'[^\w]', '', eap_filename)
+            with open(os.path.join(self.PDF_PATH,  eap_filename + '.pdf'), 'wb') as f:
                 outfile.write(f)
+                print('Writing to ' + eap_filename + '.pdf')
+                with open(self.EAP_DONE_FILENAME, 'a') as f:
+                    f.write(url + '\n')
             try:
                 os.remove(os.path.join(self.PDF_PATH, eap_url_for_entry + '.pdf'))
             except OSError:
@@ -99,11 +113,31 @@ class EAPBookFetch:
             except ValueError:
                 pass
 
-        with open(self.EAP_LIST_FILENAME) as f:
-            urls = f.read().splitlines()[0:self.dl_count]
-            pool = multiprocessing.Pool(processes=len(urls) - 1)
-            pool.map(self.download_jpg, urls)
-        return self.dl_count
+        try:
+            with open(self.EAP_DONE_FILENAME) as f:
+                urls_done = f.read().splitlines()
+        except FileNotFoundError:
+            urls_done = []
+            open(self.EAP_DONE_FILENAME, 'w')
+
+        try:
+            with open(self.EAP_LIST_FILENAME) as f:
+                urls = f.read().splitlines()
+        except FileNotFoundError:
+            urls = []
+            open(self.EAP_LIST_FILENAME, 'w')
+
+        if not urls:
+            print('No file list to download')
+            return 0
+
+        urls_not_done = list(set(urls) - set(urls_done))[::-1]
+        if len(urls_not_done) >= self.dl_count:
+            urls_not_done = urls_not_done[0:self.dl_count]
+
+        pool = multiprocessing.Pool(processes=len(urls_not_done) - 1)
+        pool.map(self.download_jpg, urls_not_done)
+        return len(urls_not_done)
 
     def __init__(self):
         self.rotation = 0
