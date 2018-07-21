@@ -1,16 +1,17 @@
 import multiprocessing
 import os
 import sys
-import time
 import urllib.request
 from urllib.error import HTTPError
 from fpdf import FPDF
 import PyPDF2
-
+import time
+from datetime import timedelta
 
 class EAPBookFetch:
 
     EAP_BASE_URL = 'https://images.eap.bl.uk'
+    EAP_LIST_FILENAME = 'eap_files.txt'
     EAP_FILENAME = 'default.jpg'
     DEFAULT_HEIGHT = 1200
     DEFAULT_WIDTH = 1200 * 0.8
@@ -79,7 +80,6 @@ class EAPBookFetch:
             print('Deleting blank page...')
             while pg < page_count:
                 p = infile.getPage(pg)
-                print(pg)
                 pg = pg + 1
                 outfile.addPage(p)
             with open(os.path.join(self.PDF_PATH, eap_url_for_entry + '_nofirst.pdf'), 'wb') as f:
@@ -90,27 +90,30 @@ class EAPBookFetch:
                 pass
 
     def run(self):
-        if len(sys.argv) < 2:
-            raise Exception("No URL to download")
-        else:
-            # shitty code, sorry
-            if len(sys.argv) < 3:
 
-                url = sys.argv[1]
-                self.download_jpg(url)
-            else:
-                urls = []
-                for arg in sys.argv:
-                    if arg.find("EAP") != -1:
-                        urls.append(arg)
-                pool = multiprocessing.Pool(processes=len(sys.argv) - 1)
-                pool.map(self.download_jpg, urls)
+        if len(sys.argv) < 2:
+            print("Limiting number of files downloaded to 50")
+        else:
+            try:
+                self.dl_count = int(sys.argv[2])
+            except ValueError:
+                pass
+
+        with open(self.EAP_LIST_FILENAME) as f:
+            urls = f.read().splitlines()[0:self.dl_count]
+            pool = multiprocessing.Pool(processes=len(urls) - 1)
+            pool.map(self.download_jpg, urls)
+        return self.dl_count
 
     def __init__(self):
         self.rotation = 0
         self.height = self.DEFAULT_HEIGHT
         self.type = 'p'  # probably broken for landscape
+        self.dl_count = 50
 
 
 if __name__ == '__main__':
-    EAPBookFetch().run()
+    start_time = time.time()
+    downloaded = EAPBookFetch().run()
+    elapsed_time_secs = time.time() - start_time
+    print("Downloaded " + str(downloaded) + " files in " + str(elapsed_time_secs) + " seconds")

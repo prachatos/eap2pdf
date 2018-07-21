@@ -1,2 +1,4 @@
+requests
+beautifulsoup4
 fpdf==1.7.2
 PyPDF2==1.26.0
