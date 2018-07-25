@@ -164,16 +164,16 @@ class EAPBookFetch:
         offset = 0
         i = 1
         page_content = "=={{int:filedesc}}==\n" +\
-            "{{Book\
-            | Author       = " + self.author + "\n" +"\
-            | Title        = " + self.title + "\n" +"\
-            | Date         = " + self.date + "\n" +"\           
-            | Language     = {{language|bn}} \n" +"\
-            | Wikisource     = s:bn:{{PAGENAME}} \n" +"\         
-            | Description  = " + self.description + "\n" +"\
-            | Source       =  British Library Endangered Archives Program \n" +"\
-            | Image        =  {{PAGENAME}} \n" +"\
-            }}" + "\n" +\
+            "{{Book\n" +\
+           "| Author       = " + self.author + "\n" +\
+           "| Title        = " + self.title + "\n" +\
+           "| Date         = " + self.date + "\n" +\           
+           "| Language     = {{language|bn}} \n" +\
+           "| Wikisource     = s:bn:{{PAGENAME}} \n" +\         
+           "| Description  = " + self.description + "\n" +\
+           "| Source       =  British Library Endangered Archives Program \n" +\
+           "| Image        =  {{PAGENAME}} \n" + \
+            "}}" + "\n" +\
             "=={{int:license-header}}==\n" + self.license + "\n" +\
             "[[Category:PDF-files in Bengali]]"
         with open(filename, 'rb') as f:
