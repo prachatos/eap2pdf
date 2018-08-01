@@ -171,7 +171,7 @@ class EAPBookFetch:
            "| Language     = {{language|bn}} \n" +\
            "| Wikisource   = s:bn:{{PAGENAME}} \n" +\         
            "| Description  = " + self.description + "\n" +\ 
-           "| Source       =  {{Endangered Archives Programme}}{{Institution:British Library}} \n" +\
+           "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + "}}{{Institution:British Library}} \n" +\
            "| Image        =  {{PAGENAME}} \n" + \
             "}}" + "\n" +\
             "=={{int:license-header}}==\n" + self.license + "\n" +\
