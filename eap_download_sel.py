@@ -169,12 +169,13 @@ class EAPBookFetch:
            "| Title        = " + self.title + "\n" +\
            "| Date         = " + self.date + "\n" +\           
            "| Language     = {{language|bn}} \n" +\
-           "| Wikisource     = s:bn:{{PAGENAME}} \n" +\         
-           "| Description  = " + self.description + "\n" +\
-           "| Source       =  British Library Endangered Archives Program \n" +\
+           "| Wikisource   = s:bn:{{PAGENAME}} \n" +\         
+           "| Description  = " + self.description + "\n" +\ 
+           "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + "}}{{Institution:British Library}} \n" +\
            "| Image        =  {{PAGENAME}} \n" + \
             "}}" + "\n" +\
             "=={{int:license-header}}==\n" + self.license + "\n" +\
+            "[[Category:Uploaded with eap2pdf]]" + "\n" +\
             "[[Category:PDF-files in Bengali]]"
         with open(filename, 'rb') as f:
             while can_go:
