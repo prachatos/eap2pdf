@@ -21,6 +21,7 @@ class EAPBookFetch:
     DEFAULT_WIDTH = 1200 * 0.8
     JPEG_PATH = 'jpgs'
     PDF_PATH = 'pdfs'
+    DELETE_ORIG_PDF = True
 
     @staticmethod
     def join_url(*args):
@@ -51,6 +52,22 @@ class EAPBookFetch:
                                    self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
 
             title = os.path.join(self.JPEG_PATH, eap_url_for_entry + '_' + str(pg) + '.jpg')
+            if os.path.isfile(title):
+                # if file exists, don't download iff next file also exists
+                # note that this effectively means that we can't parallelize at a page level
+                download_this = True
+                while True:
+                    new_title = os.path.join(self.JPEG_PATH, eap_url_for_entry + '_' + str(pg + 1) + '.jpg')
+                    old_title = os.path.join(self.JPEG_PATH, eap_url_for_entry + '_' + str(pg) + '.jpg')
+                    if os.path.isfile(new_title):
+                        print('Skipping ' + old_title)
+                        file_list.append(old_title)
+                        pg = pg + 1
+                        download_this = False
+                    else:
+                        break
+                if not download_this:
+                    continue
             pg = pg + 1
             print('Downloading ' + title)
             try:
@@ -98,10 +115,11 @@ class EAPBookFetch:
                 print('Writing to ' + eap_filename + '.pdf')
                 with open(self.EAP_DONE_FILENAME, 'a') as f:
                     f.write(url + '\n')
-            try:
-                os.remove(os.path.join(self.PDF_PATH, eap_url_for_entry + '.pdf'))
-            except OSError:
-                pass
+            if self.DELETE_ORIG_PDF:
+                try:
+                    os.remove(os.path.join(self.PDF_PATH, eap_url_for_entry + '.pdf'))
+                except OSError:
+                    pass
 
     def run(self):
 
@@ -127,15 +145,14 @@ class EAPBookFetch:
             urls = []
             open(self.EAP_LIST_FILENAME, 'w')
 
-        if not urls:
-            print('No file list to download')
-            return 0
-
         urls_not_done = list(set(urls) - set(urls_done))[::-1]
+        if not urls_not_done:
+            print('No remaining file in list to download')
+            return 0
         if len(urls_not_done) >= self.dl_count:
             urls_not_done = urls_not_done[0:self.dl_count]
 
-        pool = multiprocessing.Pool(processes=len(urls_not_done) - 1)
+        pool = multiprocessing.Pool(processes=len(urls_not_done))
         pool.map(self.download_jpg, urls_not_done)
         return len(urls_not_done)
 
