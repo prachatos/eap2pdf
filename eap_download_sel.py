@@ -168,7 +168,7 @@ class EAPBookFetch:
                        "| Title        = " + self.title + "\n" + \
                        "| Date         = " + self.date + "\n" + \
                        "| Language     = {{language|bn}}\n" + \
-                       "| Wikisource   = s:bn:{{PAGENAME}}\n" + \
+                       "| Wikisource   = s:bn:নির্ঘণ্ট:{{PAGENAME}}\n" + \
                        "| Description  = " + self.description + "\n" + \
                        "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + \
                        "}}{{Institution:British Library}}\n" + \
