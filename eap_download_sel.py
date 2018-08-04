@@ -11,7 +11,6 @@ import _helpers
 
 
 class EAPBookFetch:
-
     EAP_BASE_URL = 'https://images.eap.bl.uk'
     EAP_ARCHIVE_URL = 'https://eap.bl.uk/archive-file/'
     EAP_CONFIG_FILENAME = 'eap_conf.ini'
@@ -94,7 +93,7 @@ class EAPBookFetch:
             else:
                 eap_filename = eap_file.title.text.split('|')[0].strip()
                 eap_filename = re.sub(r'[^\w]', '', eap_filename)
-            with open(os.path.join(self.PDF_PATH,  eap_filename + '.pdf'), 'wb') as f:
+            with open(os.path.join(self.PDF_PATH, eap_filename + '.pdf'), 'wb') as f:
                 outfile.write(f)
                 print('Writing to ' + eap_filename + '.pdf')
             try:
@@ -163,20 +162,21 @@ class EAPBookFetch:
         print(self.token)
         offset = 0
         i = 1
-        page_content = "=={{int:filedesc}}==\n" +\
-            "{{Book\n" +\
-           "| Author       = " + self.author + "\n" +\
-           "| Title        = " + self.title + "\n" +\
-           "| Date         = " + self.date + "\n" +\
-           "| Language     = {{language|bn}}\n" +\
-           "| Wikisource   = s:bn:{{PAGENAME}}\n" +\
-           "| Description  = " + self.description + "\n" +\
-           "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + "}}{{Institution:British Library}}\n" +\
-           "| Image        =  {{PAGENAME}}\n" +\
-            "}}\n" +\
-            "=={{int:license-header}}==\n" + self.license + "\n" +\
-            "[[Category:Uploaded with eap2pdf]]\n" +\
-            "[[Category:PDF-files in Bengali]]"
+        page_content = "=={{int:filedesc}}==\n" + \
+                       "{{Book\n" + \
+                       "| Author       = " + self.author + "\n" + \
+                       "| Title        = " + self.title + "\n" + \
+                       "| Date         = " + self.date + "\n" + \
+                       "| Language     = {{language|bn}}\n" + \
+                       "| Wikisource   = s:bn:{{PAGENAME}}\n" + \
+                       "| Description  = " + self.description + "\n" + \
+                       "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + \
+                       "}}{{Institution:British Library}}\n" + \
+                       "| Image        =  {{PAGENAME}}\n" + \
+                       "}}\n" + \
+                       "=={{int:license-header}}==\n" + self.license + "\n" + \
+                       "[[Category:Uploaded with eap2pdf]]\n" + \
+                       "[[Category:PDF-files in Bengali]]"
         with open(filename, 'rb') as f:
             while can_go:
                 chunk = f.read(self.CHUNK_SIZE)
@@ -190,7 +190,7 @@ class EAPBookFetch:
                         'chunk': chunk,
                         'token': self.token
                     }, files={'chunk': chunk,
-                        'filename': self.filename + '.pdf'})
+                              'filename': self.filename + '.pdf'})
                     print('Uploaded ' + str(i) + ' MB...')
                     i = i + 1
                     try:
@@ -209,7 +209,7 @@ class EAPBookFetch:
                         'chunk': chunk,
                         'token': self.token
                     }, files={'chunk': chunk,
-                        'filename': self.filename + '.pdf'})
+                              'filename': self.filename + '.pdf'})
                     print('Uploaded ' + str(i) + ' MB...')
                     i = i + 1
                     try:
