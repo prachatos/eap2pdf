@@ -170,7 +170,7 @@ class EAPBookFetch:
                        "| Language     = {{language|bn}}\n" + \
                        "| Wikisource   = s:bn:নির্ঘণ্ট:{{PAGENAME}}\n" + \
                        "| Description  = " + self.description + "\n" + \
-                       "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url + \
+                       "| Source       =  {{Endangered Archives Programme|url=" + self.EAP_ARCHIVE_URL + self.url.replace('/', '-') + \
                        "}}{{Institution:British Library}}\n" + \
                        "| Image        =  {{PAGENAME}}\n" + \
                        "}}\n" + \
