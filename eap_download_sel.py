@@ -46,9 +46,14 @@ class EAPBookFetch:
         if not os.path.exists(self.JPEG_PATH):
             os.makedirs(self.JPEG_PATH)
         while can_go:
-            dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.height) + ',' +
-                                   str(self.DEFAULT_WIDTH), str(self.rotation),
-                                   self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
+            if self.type == 'p':
+                dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.height) + ',' +
+                                       str(self.DEFAULT_WIDTH), str(self.rotation),
+                                       self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
+            else:
+                dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.DEFAULT_WIDTH) + ',' +
+                                       str(self.height), str(self.rotation),
+                                       self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
 
             title = os.path.join(self.JPEG_PATH, eap_url_for_entry + '_' + str(pg) + '.jpg')
             pg = pg + 1
@@ -56,22 +61,21 @@ class EAPBookFetch:
             try:
                 urllib.request.urlretrieve(dl_url, title)
                 file_list.append(title)
-            except HTTPError:
+            except HTTPError as e:
+                print(e)
+                print(dl_url)
                 can_go = False
 
-        if self.type == 'p':
-            pdf = FPDF(orientation=str(self.type), unit='pt', format=(self.DEFAULT_WIDTH + 50, int(self.height) + 50))
-            pdf.add_page(orientation=self.type)
-        else:
-            pdf = FPDF(orientation=self.type, unit='pt', format=(self.height + 50, self.DEFAULT_WIDTH + 50))
-            pdf.add_page(orientation=self.type)
+        pdf = FPDF(orientation=self.type, unit='pt', format=(self.height + 50, self.DEFAULT_WIDTH + 50))
+        pdf.add_page(orientation=self.type)
 
         for image in file_list:
             print('Adding ' + image + ' to PDF')
             if self.type == 'p':
-                pdf.image(image, h=self.height, w=self.DEFAULT_WIDTH)
+                pdf.image(image, h=self.DEFAULT_WIDTH, w=self.height)
             else:
                 pdf.image(image, h=self.height, w=self.DEFAULT_WIDTH)
+
         page_count = pdf.page_no()
         if not os.path.exists(self.PDF_PATH):
             os.makedirs(self.PDF_PATH)
@@ -105,12 +109,18 @@ class EAPBookFetch:
 
     def read_config(self):
         config_parser = configparser.ConfigParser()
-        config_parser.read(self.EAP_CONFIG_FILENAME)
+        config_parser.read(self.EAP_CONFIG_FILENAME, encoding='utf8')
         self.url = config_parser.get('download', 'url')
         if config_parser.has_option('download', 'rotation'):
-            self.rotation = config_parser.get('download', 'rotation')
+            try:
+                self.rotation = int(config_parser.get('download', 'rotation'))
+            except ValueError:
+                self.rotation = 0
         if config_parser.has_option('download', 'height'):
-            self.height = int(config_parser.get('download', 'height'))
+            try:
+                self.height = int(config_parser.get('download', 'height'))
+            except ValueError:
+                self.height = 1200
         if config_parser.has_option('download', 'orientation'):
             self.type = config_parser.get('download', 'orientation')  # does not work!
         try:
@@ -244,7 +254,7 @@ class EAPBookFetch:
 
     def run(self):
         try:
-            with open(self.EAP_CONFIG_FILENAME) as f:
+            with open(self.EAP_CONFIG_FILENAME):
                 self.read_config()
         except FileNotFoundError:
             print('No configuration file found!')
@@ -262,7 +272,7 @@ class EAPBookFetch:
     def __init__(self):
         self.rotation = 0
         self.height = self.DEFAULT_HEIGHT
-        self.type = 'p'  # probably broken for landscape
+        self.type = 'l'  # probably broken for landscape
         self.url = ''
         self.username = ''
         self.password = ''

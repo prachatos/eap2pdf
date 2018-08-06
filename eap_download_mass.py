@@ -11,7 +11,6 @@ import _helpers
 
 
 class EAPBookFetch:
-
     EAP_BASE_URL = 'https://images.eap.bl.uk'
     EAP_ARCHIVE_URL = 'https://eap.bl.uk/archive-file/'
     EAP_LIST_FILENAME = 'eap_files.txt'
@@ -47,10 +46,15 @@ class EAPBookFetch:
         if not os.path.exists(self.JPEG_PATH):
             os.makedirs(self.JPEG_PATH)
         while can_go:
-            dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.height) + ',' +
-                                   str(self.DEFAULT_WIDTH), str(self.rotation),
-                                   self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
-
+            if self.type == 'p':
+                dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.height) + ',' +
+                                       str(self.DEFAULT_WIDTH), str(self.rotation),
+                                       self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
+            else:
+                dl_url = self.join_url(combined_url, str(pg) + '.jp2', 'full', str(self.DEFAULT_WIDTH) + ',' +
+                                       str(self.height), str(self.rotation),
+                                       self.EAP_FILENAME + '?t=' + str(int(time.time() * 1000)))
+            print(dl_url)
             title = os.path.join(self.JPEG_PATH, eap_url_for_entry + '_' + str(pg) + '.jpg')
             if os.path.isfile(title):
                 # if file exists, don't download iff next file also exists
@@ -76,17 +80,13 @@ class EAPBookFetch:
             except HTTPError:
                 can_go = False
 
-        if self.type == 'p':
-            pdf = FPDF(orientation=self.type, unit='pt', format=(self.DEFAULT_WIDTH + 50, self.height + 50))
-            pdf.add_page(orientation=self.type)
-        else:
-            pdf = FPDF(orientation=self.type, unit='pt', format=(self.height + 50, self.DEFAULT_WIDTH + 50))
-            pdf.add_page(orientation=self.type)
+        pdf = FPDF(orientation=self.type, unit='pt', format=(self.height + 50, self.DEFAULT_WIDTH + 50))
+        pdf.add_page(orientation=self.type)
 
         for image in file_list:
             print('Adding ' + image + ' to PDF')
             if self.type == 'p':
-                pdf.image(image, h=self.height, w=self.DEFAULT_WIDTH)
+                pdf.image(image, h=self.DEFAULT_WIDTH, w=self.height)
             else:
                 pdf.image(image, h=self.height, w=self.DEFAULT_WIDTH)
         page_count = pdf.page_no()
@@ -110,7 +110,7 @@ class EAPBookFetch:
             else:
                 eap_filename = eap_file.title.text.split('|')[0].strip()
                 eap_filename = re.sub(r'[^\w]', '', eap_filename)
-            with open(os.path.join(self.PDF_PATH,  eap_filename + '.pdf'), 'wb') as f:
+            with open(os.path.join(self.PDF_PATH, eap_filename + '.pdf'), 'wb') as f:
                 outfile.write(f)
                 print('Writing to ' + eap_filename + '.pdf')
                 with open(self.EAP_DONE_FILENAME, 'a') as f:
