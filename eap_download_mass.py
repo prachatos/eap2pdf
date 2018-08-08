@@ -159,7 +159,7 @@ class EAPBookFetch:
     def __init__(self):
         self.rotation = 0
         self.height = self.DEFAULT_HEIGHT
-        self.type = 'p'  # probably broken for landscape
+        self.type = 'l'  # probably broken for landscape
         self.dl_count = 50
 
 
